@@ -5374,23 +5374,25 @@ if(currentDelivery.ID == 11)
 	$('body').on('click', '.place-kladr', function(){
 		 $('.addr-input').val($(this).html());
 		 // тут якарты как то вычисляют дистанцию. в $(this),html() - форматированная строка
-		 resultDistance = 15;
-		 if (resultDistance){
-		 		$('.hiddistance').val(resultDistance); // вычесленная дистанция
-	 	 } else {
+		 var route = ymaps.route([
+			 'Москва, Красная площадь, 1', //дарес точки от куда везем заказ
+			 $(this).html()
+		 ], {
+				 multiRoute: true
+		 })
+		 .done(function (route) {
+				 var distance = route.getActiveRoute().properties.get("distance");
+				 resultDistance = Math.round(distance.value/1000);
+				 $('.hiddistance').val(resultDistance);
+		 },
+		 function (err) {
 			 // если дистанция не нашлась
 			 $('.hiddistance').val(0);
-			$('.note-addr').show();
-		 }
+		 }, this);
 
 		 $(autocompleteKladr).hide();
 		 //пересчет доставки
 		 BX.Sale.OrderAjaxComponent.sendRequest();
-		 if (!resultDistance){
-		 		 // если дистанция не нашлась
-			 $('.hiddistance').val(0);
-			 $('.note-addr').show();
-		 }
 	});
 	BX.bind(inputAddr, 'keyup',function(e) {
 		if (inputAddr.value.length > 3) {
